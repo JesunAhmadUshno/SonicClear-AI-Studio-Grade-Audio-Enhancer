@@ -44,8 +44,8 @@ synthetic signal.
 
 ## Findings left for the owner (they change app behaviour)
 
-- **int16 wrap-around:** `(denoised_data * np.iinfo(np.int16).max).astype(np.int16)` has no `np.clip`,
-  so any sample beyond full scale wraps to the opposite sign (a loud click). Fix: clip to [-1, 1] first.
+- **int16 wrap-around:** fixed, the gate output is clipped to [-1, 1] before the int16 cast, so samples
+  beyond full scale saturate instead of wrapping to the opposite sign (tests/test_process_audio.py).
 - **Path traversal on upload:** fixed, the client filename now goes through `werkzeug.utils.secure_filename`
   (tests/test_app.py). Still open: `MAX_CONTENT_LENGTH`, and `debug=False` outside localhost.
 - **Stereo collapse:** when the gate or EQ is on, only the left channel is kept; the gate also forces

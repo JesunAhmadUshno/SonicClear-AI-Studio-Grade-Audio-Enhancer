@@ -523,7 +523,7 @@ function Receipts() {
     ['README vs code', `The EQ has no treble boost and its bass gain is about ${sgn(EQ_DC_DB, 0)} dB, not ${sgn(README_EQ.gainDb, 0)}. The gate threshold (${P.gate_threshold.toFixed(1)}× mean noise) was undocumented. README is now corrected.`],
     ['Silent-start assumption', `The noise profile is the first ${P.noise_profile_seconds} s, assumed speech-free. Nothing checks that; the playground shows what happens when it isn’t.`],
     ['Musical noise', 'A hard binary mask with a fixed floor and no smoothing over time or frequency. A soft (Wiener-style) gain would be the usual fix.'],
-    ['Channels and clipping', 'Stereo input keeps the left channel only when the gate or EQ is on. The gate output is cast to int16 without np.clip, so peaks over full scale wrap around.'],
+    ['Channels and clipping', 'Stereo input keeps the left channel only when the gate or EQ is on. The gate output is now clipped to ±1 before the int16 cast, so peaks over full scale saturate instead of wrapping.'],
     ['Upload handling', 'The client filename now goes through secure_filename, so uploads stay in uploads/. Still runs with debug=True and has no size limit: fine on localhost, unsafe on a server.'],
     ['Packaging', 'No pinned versions, and the README cites an MIT LICENSE file that does not exist.'],
   ];

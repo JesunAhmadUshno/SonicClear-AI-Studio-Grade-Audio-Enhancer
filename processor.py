@@ -59,7 +59,8 @@ def process_audio(input_path, output_path, options):
         denoised_data = spectral_gate(data_float, sample_rate)
         
         # Reconstruct AudioSegment
-        denoised_data_int = (denoised_data * np.iinfo(np.int16).max).astype(np.int16)
+        # The ISTFT can overshoot full scale on loud material: clip so it saturates instead of wrapping
+        denoised_data_int = (np.clip(denoised_data, -1.0, 1.0) * np.iinfo(np.int16).max).astype(np.int16)
         audio = AudioSegment(
             denoised_data_int.tobytes(), 
             frame_rate=sample_rate,
