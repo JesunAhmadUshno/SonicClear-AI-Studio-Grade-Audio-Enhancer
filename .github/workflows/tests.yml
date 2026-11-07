@@ -1,6 +1,6 @@
 name: Tests
 
-# Runs the DSP unit tests (numpy + scipy only; no FFmpeg needed).
+# Runs the unit tests (requirements.txt; no FFmpeg needed).
 on:
   push:
   pull_request:
@@ -16,5 +16,5 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - run: pip install numpy==2.4.5 scipy==1.17.1
+      - run: pip install -r requirements.txt
       - run: python -m unittest discover -s tests -v
