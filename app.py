@@ -1,5 +1,6 @@
 from flask import Flask, request, send_file, render_template, jsonify, url_for
 import os
+from werkzeug.utils import secure_filename
 from processor import process_audio
 
 # REMOVED: template_folder='static'
@@ -18,7 +19,9 @@ def process_file():
         return jsonify({'error': 'No file uploaded'}), 400
     
     file = request.files['file']
-    if file.filename == '':
+    # The client controls the filename: strip path parts so the file always lands in uploads/
+    filename = secure_filename(file.filename or '')
+    if filename == '':
         return jsonify({'error': 'No file selected'}), 400
 
     options = {
@@ -27,8 +30,8 @@ def process_file():
         'eq': request.form.get('eq')
     }
 
-    filepath = os.path.join(UPLOAD_FOLDER, file.filename)
-    output_filename = f"processed_{file.filename.rsplit('.', 1)[0]}.mp3"
+    filepath = os.path.join(UPLOAD_FOLDER, filename)
+    output_filename = f"processed_{filename.rsplit('.', 1)[0]}.mp3"
     output_path = os.path.join(UPLOAD_FOLDER, output_filename)
     
     file.save(filepath)

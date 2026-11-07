@@ -46,8 +46,8 @@ synthetic signal.
 
 - **int16 wrap-around:** `(denoised_data * np.iinfo(np.int16).max).astype(np.int16)` has no `np.clip`,
   so any sample beyond full scale wraps to the opposite sign (a loud click). Fix: clip to [-1, 1] first.
-- **Path traversal on upload:** `os.path.join(UPLOAD_FOLDER, file.filename)` uses the raw client
-  filename. Fix: `werkzeug.utils.secure_filename`, plus `MAX_CONTENT_LENGTH`, and `debug=False` outside localhost.
+- **Path traversal on upload:** fixed, the client filename now goes through `werkzeug.utils.secure_filename`
+  (tests/test_app.py). Still open: `MAX_CONTENT_LENGTH`, and `debug=False` outside localhost.
 - **Stereo collapse:** when the gate or EQ is on, only the left channel is kept; the gate also forces
   mono 16-bit output. Non-16-bit input is rescaled by its own dtype but written as int16.
 - **Musical noise:** hard binary mask, fixed floor, no smoothing across time or frequency.

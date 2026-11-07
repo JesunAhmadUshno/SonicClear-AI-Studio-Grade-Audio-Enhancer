@@ -524,7 +524,7 @@ function Receipts() {
     ['Silent-start assumption', `The noise profile is the first ${P.noise_profile_seconds} s, assumed speech-free. Nothing checks that; the playground shows what happens when it isn’t.`],
     ['Musical noise', 'A hard binary mask with a fixed floor and no smoothing over time or frequency. A soft (Wiener-style) gain would be the usual fix.'],
     ['Channels and clipping', 'Stereo input keeps the left channel only when the gate or EQ is on. The gate output is cast to int16 without np.clip, so peaks over full scale wrap around.'],
-    ['Upload handling', 'Saves to uploads/ under the raw client filename (no secure_filename), runs with debug=True and has no size limit. Fine on localhost, unsafe on a server.'],
+    ['Upload handling', 'The client filename now goes through secure_filename, so uploads stay in uploads/. Still runs with debug=True and has no size limit: fine on localhost, unsafe on a server.'],
     ['Packaging', 'No pinned versions, and the README cites an MIT LICENSE file that does not exist.'],
   ];
   const docs = [
