@@ -85,7 +85,8 @@ gaps.
 ## Tests and references
 
 ```bash
-python3 -m unittest discover -s tests     # numpy + scipy only
+python3 -m unittest discover -s tests     # needs requirements.txt (Flask, pydub; no FFmpeg)
+                                          # tests/test_processor.py alone needs numpy + scipy only
 python3 scripts/make_reference.py         # regenerates results/*.json
                                           # (pip install pydub==0.25.1 for the compressor/EQ reference)
 cd site && npm ci && npm run build        # the build re-checks the browser port against results/
@@ -116,7 +117,7 @@ SonicClear-AI-Studio-Grade-Audio-Enhancer/
 ├── uploads/          # Runtime storage for files in process
 ├── scripts/          # make_reference.py: known-answer references, SNR run
 ├── results/          # Generated JSON the dashboard reads
-├── tests/            # unittest suite for the DSP
+├── tests/            # unittest suite: DSP, process_audio, upload handler
 └── site/             # The live dashboard (Vite + React)
 ```
 
