@@ -1,0 +1,101 @@
+{
+ "what": "True SNR before and after processor.spectral_gate on a synthetic harmonic signal; not speech, not PESQ/STOI",
+ "versions": {
+  "numpy": "2.4.5",
+  "scipy": "1.17.1"
+ },
+ "signal": {
+  "fs": 16000,
+  "duration_s": 4.0,
+  "bursts": [
+   [
+    1.1,
+    1.7,
+    120.0,
+    150.0
+   ],
+   [
+    1.9,
+    2.6,
+    140.0,
+    110.0
+   ],
+   [
+    2.9,
+    3.7,
+    115.0,
+    135.0
+   ]
+  ],
+  "n_harmonics": 24,
+  "peak": 0.3
+ },
+ "seeds": [
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+  9,
+  10
+ ],
+ "rows": [
+  {
+   "noise": "white",
+   "snr_in_db": 0.0,
+   "snr_out_db_mean": 6.709,
+   "snr_out_db_sd": 0.085,
+   "snr_gain_db_mean": 6.709,
+   "residual_noise_db_mean": -8.046,
+   "residual_noise_db_sd": 0.163
+  },
+  {
+   "noise": "white",
+   "snr_in_db": 5.0,
+   "snr_out_db_mean": 11.433,
+   "snr_out_db_sd": 0.071,
+   "snr_gain_db_mean": 6.433,
+   "residual_noise_db_mean": -8.046,
+   "residual_noise_db_sd": 0.163
+  },
+  {
+   "noise": "white",
+   "snr_in_db": 10.0,
+   "snr_out_db_mean": 16.183,
+   "snr_out_db_sd": 0.074,
+   "snr_gain_db_mean": 6.183,
+   "residual_noise_db_mean": -8.046,
+   "residual_noise_db_sd": 0.163
+  },
+  {
+   "noise": "pink",
+   "snr_in_db": 0.0,
+   "snr_out_db_mean": 5.499,
+   "snr_out_db_sd": 0.639,
+   "snr_gain_db_mean": 5.499,
+   "residual_noise_db_mean": -7.134,
+   "residual_noise_db_sd": 0.958
+  },
+  {
+   "noise": "pink",
+   "snr_in_db": 5.0,
+   "snr_out_db_mean": 10.338,
+   "snr_out_db_sd": 0.616,
+   "snr_gain_db_mean": 5.338,
+   "residual_noise_db_mean": -7.134,
+   "residual_noise_db_sd": 0.958
+  },
+  {
+   "noise": "pink",
+   "snr_in_db": 10.0,
+   "snr_out_db_mean": 15.158,
+   "snr_out_db_sd": 0.591,
+   "snr_gain_db_mean": 5.158,
+   "residual_noise_db_mean": -7.134,
+   "residual_noise_db_sd": 0.958
+  }
+ ]
+}

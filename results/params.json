@@ -1,0 +1,42 @@
+{
+ "source": "processor.py module constants",
+ "noise_profile_seconds": 1.0,
+ "nperseg": 1024,
+ "noverlap": 512,
+ "gate_threshold": 2.0,
+ "mask_floor": 0.1,
+ "compress": {
+  "threshold": -20.0,
+  "ratio": 4.0,
+  "attack": 5.0,
+  "release": 50.0
+ },
+ "eq_lowpass_hz": 250,
+ "eq_gain_db": 4,
+ "synthetic_signal": {
+  "fs": 16000,
+  "duration_s": 4.0,
+  "bursts": [
+   [
+    1.1,
+    1.7,
+    120.0,
+    150.0
+   ],
+   [
+    1.9,
+    2.6,
+    140.0,
+    110.0
+   ],
+   [
+    2.9,
+    3.7,
+    115.0,
+    135.0
+   ]
+  ],
+  "n_harmonics": 24,
+  "peak": 0.3
+ }
+}
