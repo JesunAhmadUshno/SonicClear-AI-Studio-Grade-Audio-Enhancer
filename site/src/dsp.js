@@ -215,7 +215,11 @@ export function eqResponseDb(f, fs, cutoff, gainDb) {
 }
 
 // The README's described curve: +4 dB below 250 Hz and +4 dB above 6 kHz (a plain step, for comparison only).
-export const readmeCurveDb = (f) => (f < 250 || f > 6000 ? 4 : 0);
+export const README_EQ = { gainDb: 4, belowHz: 250, aboveHz: 6000 };
+export const readmeCurveDb = (f) => (f < README_EQ.belowHz || f > README_EQ.aboveHz ? README_EQ.gainDb : 0);
+
+// Pass tolerances for the known-answer check (dsp.check.mjs); the page quotes these same values.
+export const TOL = { gateMaxAbs: 1e-8, int16Steps: 2, eqDb: 0.1 };
 
 // ---- recorded-file statistics ----
 export function levelStats(x) {

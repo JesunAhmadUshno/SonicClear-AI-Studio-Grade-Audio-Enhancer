@@ -4,7 +4,7 @@ import snrRef from '../../results/gate_snr.json';
 import pyd from '../../results/pydub_reference.json';
 import mp3Url from '../../uploads/processed_EP1.mp3?url';
 import {
-  cleanSignal, noiseSignal, mix, measure, spectralGate, spectrogramDb, compress, eqResponseDb, readmeCurveDb, levelStats, toInt16, mp3Header,
+  cleanSignal, noiseSignal, mix, measure, spectralGate, spectrogramDb, compress, eqResponseDb, readmeCurveDb, levelStats, toInt16, mp3Header, README_EQ, TOL,
 } from './dsp.js';
 
 const REPO = 'https://github.com/JesunAhmadUshno/SonicClear-AI-Studio-Grade-Audio-Enhancer';
@@ -14,6 +14,9 @@ const C = P.compress;
 const FS = P.synthetic_signal.fs;
 const CLEAN = cleanSignal(P.synthetic_signal);
 const row = (noise, snr) => snrRef.rows.find((r) => r.noise === noise && r.snr_in_db === snr);
+const SNR_LEVELS = [...new Set(snrRef.rows.map((r) => r.snr_in_db))];
+const orList = (xs, w) => (xs.length > 1 ? `${xs.slice(0, -1).join(', ')} ${w} ${xs[xs.length - 1]}` : `${xs[0]}`);
+const EQ_DC_DB = eqResponseDb(0, FS, P.eq_lowpass_hz, P.eq_gain_db); // DC gain is 20*log10(1+g), independent of fs
 const tone = (hz) => pyd.eq_tone_gain_db_48k.find((t) => t.hz === hz).gain_db;
 
 const SECTIONS = [['top', 'Overview', '◎'], ['chain', 'Chain', '⇢'], ['gate', 'Gate', '▤'], ['compressor', 'Compressor', '◢'], ['eq', 'EQ', '∿'], ['recorded', 'Recorded', '●'], ['receipts', 'Receipts', '✓']];
@@ -184,10 +187,10 @@ function Hero() {
         <span className="hint">Rebuild the references with <code>python3 scripts/make_reference.py</code></span>
       </div>
       <div className="tiles">
-        <div className="tile"><div className="num">{sgn(w0.snr_gain_db_mean)} dB</div><div className="cap">SNR gain on white noise at 0 dB input (±{w0.snr_out_db_sd} dB SD, {snrRef.seeds.length} seeds)</div></div>
-        <div className="tile"><div className="num">{sgn(p0.snr_gain_db_mean)} dB</div><div className="cap">SNR gain on pink noise at 0 dB input (±{p0.snr_out_db_sd} dB SD)</div></div>
-        <div className="tile"><div className="num">{sgn(w0.residual_noise_db_mean)} dB</div><div className="cap">Noise left in the speech-free first second (white)</div></div>
-        <div className="tile"><div className="num">{sgn(tone(6000), 2)} dB</div><div className="cap">EQ gain at 6 kHz, measured with pydub. The README says +4 dB.</div></div>
+        <div className="tile"><div className="num">{sgn(w0.snr_gain_db_mean)} dB</div><div className="cap">SNR gain on white noise at {w0.snr_in_db} dB input (±{w0.snr_out_db_sd} dB SD, {snrRef.seeds.length} seeds)</div></div>
+        <div className="tile"><div className="num">{sgn(p0.snr_gain_db_mean)} dB</div><div className="cap">SNR gain on pink noise at {p0.snr_in_db} dB input (±{p0.snr_out_db_sd} dB SD)</div></div>
+        <div className="tile"><div className="num">{sgn(w0.residual_noise_db_mean)} dB</div><div className="cap">Noise left in the speech-free first {P.noise_profile_seconds} s (white)</div></div>
+        <div className="tile"><div className="num">{sgn(tone(README_EQ.aboveHz), 2)} dB</div><div className="cap">EQ gain at {README_EQ.aboveHz / 1000} kHz, measured with pydub. The README says {sgn(README_EQ.gainDb, 0)} dB.</div></div>
       </div>
     </header>
   );
@@ -257,7 +260,7 @@ function Gate() {
     const top = Math.max(...sIn.map((f) => Math.max(...f)));
     return { noisy, y, sIn, sOut, top, kept: g.keptFraction, m: measure(CLEAN, noisy, y, FS, win) };
   }, [colour, snr, k, floor, win, seed]);
-  const isDefault = k === P.gate_threshold && floor === P.mask_floor && win === P.noise_profile_seconds && [0, 5, 10].includes(snr);
+  const isDefault = k === P.gate_threshold && floor === P.mask_floor && win === P.noise_profile_seconds && SNR_LEVELS.includes(snr);
   const ref = isDefault ? row(colour, snr) : null;
   const speechInProfile = win > P.synthetic_signal.bursts[0][0];
   const W = 960, H = 120;
@@ -289,7 +292,7 @@ function Gate() {
       </div>
       <p className="hint" style={{ marginTop: 10 }}>
         {speechInProfile ? <span className="pill bad">Profile window includes speech</span> : null}{' '}
-        {ref ? <>At these settings the committed 10-seed run (<a href={blob('results/gate_snr.json')}>gate_snr.json</a>) averaged {ref.snr_out_db_mean} dB out (SD {ref.snr_out_db_sd}).</> : 'Move back to the repo defaults (2.0×, 0.10, 1.00 s) at 0, 5 or 10 dB to compare with the committed run.'}
+        {ref ? <>At these settings the committed {snrRef.seeds.length}-seed run (<a href={blob('results/gate_snr.json')}>gate_snr.json</a>) averaged {ref.snr_out_db_mean} dB out (SD {ref.snr_out_db_sd}).</> : `Move back to the repo defaults (${P.gate_threshold.toFixed(1)}×, ${P.mask_floor.toFixed(2)}, ${P.noise_profile_seconds.toFixed(2)} s) at ${orList(SNR_LEVELS, 'or')} dB to compare with the committed run.`}
       </p>
       <div className="grid2" style={{ marginTop: 16 }}>
         <div><h3>Before: noisy input</h3><Spectro frames={r.sIn} fs={FS} maxHz={FS / 2} top={r.top} label="Spectrogram of the noisy input" /></div>
@@ -343,10 +346,10 @@ function Compressor() {
   return (
     <section id="compressor" className="card window reveal" data-title="compressor.app — transfer curve · live">
       <p className="eyebrow">Live · pydub's algorithm, ported</p>
-      <h2>Above {thr} dB, every 4 dB in becomes {(4 / ratio).toFixed(1)} dB out.</h2>
+      <h2>Above {thr} dB, every {ratio} dB in becomes 1 dB out.</h2>
       <p className="sub">
         pydub's compressor measures RMS over the last {attack} ms, then ramps its gain reduction toward (1 − 1/ratio) × the excess, faster on attack than on release.
-        The port reproduces pydub 0.25.1's output to within two sample steps on the reference slice (<a href={blob('results/pydub_reference.json')}>pydub_reference.json</a>). Dashed lines are the repo defaults.
+        The port reproduces pydub {pyd.versions.pydub}'s output to within {TOL.int16Steps} sample steps on the reference slice (<a href={blob('results/pydub_reference.json')}>pydub_reference.json</a>). Dashed lines are the repo defaults.
       </p>
       <div className="controls">
         <Range label="Threshold" value={thr} min={-40} max={0} step={1} onChange={setThr} show={`${thr} dBFS`} />
@@ -414,7 +417,7 @@ function Eq() {
           <h2>The “broadcast EQ” is a bass boost of about {dc.toFixed(1)} dB, with no treble lift.</h2>
           <p className="sub">
             The code runs <code>audio.low_pass_filter({P.eq_lowpass_hz}).apply_gain({P.eq_gain_db}).overlay(audio)</code>: a +{P.eq_gain_db} dB copy of a gentle one-pole low-pass, added back to the dry signal.
-            At low frequencies the two add up to about {dc.toFixed(1)} dB, and the boost fades slowly through the midrange. The README describes +4 dB below 250 Hz and +4 dB above 6 kHz; the code has no path that boosts treble.
+            At low frequencies the two add up to about {dc.toFixed(1)} dB, and the boost fades slowly through the midrange. The README describes {sgn(README_EQ.gainDb, 0)} dB below {README_EQ.belowHz} Hz and {sgn(README_EQ.gainDb, 0)} dB above {README_EQ.aboveHz / 1000} kHz; the code has no path that boosts treble.
           </p>
         </div>
         <Seg label="Sample rate" value={fs} options={[[16000, '16 kHz'], [44100, '44.1 kHz'], [48000, '48 kHz']]} onChange={setFs} />
@@ -509,16 +512,16 @@ function Recorded() {
 
 function Receipts() {
   const measured = [
-    ['Gate vs scipy', 'The browser port matches processor.spectral_gate sample by sample (max error under 1e-8) on the reference signal.', 'good', 'Checked'],
-    ['Compressor and EQ vs pydub', 'The ports match pydub 0.25.1 within two int16 steps; the analytic EQ curve matches pydub tone gains within 0.1 dB.', 'good', 'Checked'],
-    ['SNR on a synthetic signal', `True SNR in and out at 0, 5 and 10 dB, white and pink noise, ${snrRef.seeds.length} seeds. Harmonic bursts, not speech.`, 'warn', 'Synthetic'],
+    ['Gate vs scipy', `The browser port matches processor.spectral_gate sample by sample (max error under ${TOL.gateMaxAbs.toExponential(0)}) on the reference signal.`, 'good', 'Checked'],
+    ['Compressor and EQ vs pydub', `The ports match pydub ${pyd.versions.pydub} within ${TOL.int16Steps} int16 steps; the analytic EQ curve matches pydub tone gains within ${TOL.eqDb} dB.`, 'good', 'Checked'],
+    ['SNR on a synthetic signal', `True SNR in and out at ${orList(SNR_LEVELS, 'and')} dB, white and pink noise, ${snrRef.seeds.length} seeds. Harmonic bursts, not speech.`, 'warn', 'Synthetic'],
     ['Speech quality (PESQ, STOI, DNSMOS, listening test)', 'Not measured. Needs a fixed set of real noisy/clean speech pairs with settings recorded.', 'bad', 'Missing'],
     ['Baselines', 'Not compared against noisereduce, RNNoise or DeepFilterNet.', 'bad', 'Missing'],
     ['Recorded file', 'One output, no matching settings, unknown speaker and consent record.', 'warn', 'Unscored'],
   ];
   const issues = [
-    ['README vs code', 'The EQ has no treble boost and its bass gain is about +8 dB, not +4. The gate threshold (2.0× mean noise) was undocumented. README is now corrected.'],
-    ['Silent-start assumption', 'The noise profile is the first second, assumed speech-free. Nothing checks that; the playground shows what happens when it isn’t.'],
+    ['README vs code', `The EQ has no treble boost and its bass gain is about ${sgn(EQ_DC_DB, 0)} dB, not ${sgn(README_EQ.gainDb, 0)}. The gate threshold (${P.gate_threshold.toFixed(1)}× mean noise) was undocumented. README is now corrected.`],
+    ['Silent-start assumption', `The noise profile is the first ${P.noise_profile_seconds} s, assumed speech-free. Nothing checks that; the playground shows what happens when it isn’t.`],
     ['Musical noise', 'A hard binary mask with a fixed floor and no smoothing over time or frequency. A soft (Wiener-style) gain would be the usual fix.'],
     ['Channels and clipping', 'Stereo input keeps the left channel only when the gate or EQ is on. The gate output is cast to int16 without np.clip, so peaks over full scale wrap around.'],
     ['Upload handling', 'Saves to uploads/ under the raw client filename (no secure_filename), runs with debug=True and has no size limit. Fine on localhost, unsafe on a server.'],
