@@ -1,0 +1,12 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+
+# OS noise
+.DS_Store
+
+# site build
+site/node_modules/
+site/dist/
+site/.rubric/
