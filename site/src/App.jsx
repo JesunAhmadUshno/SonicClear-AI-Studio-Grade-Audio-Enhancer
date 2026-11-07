@@ -198,11 +198,11 @@ function Hero() {
 
 function Chain() {
   const steps = [
-    ['Load', 'pydub + FFmpeg', ['left channel only', 'if stereo', 'scaled to ±1 float']],
+    ['Load', 'pydub + FFmpeg', ['each channel', 'kept separate', 'scaled to ±1 float']],
     ['Spectral gate', 'scipy STFT', [`Hann, ${P.nperseg} samples`, `${P.noverlap} overlap`, `noise: mean |Z|,`, `first ${P.noise_profile_seconds} s`, `keep |Z| > ${P.gate_threshold}× noise`, `else scale ×${P.mask_floor}`]],
     ['Compress', 'pydub', [`threshold ${C.threshold} dBFS`, `ratio ${C.ratio}:1`, `attack ${C.attack} ms`, `release ${C.release} ms`, 'RMS, attack window']],
     ['EQ', 'pydub', [`one-pole low-pass`, `at ${P.eq_lowpass_hz} Hz, +${P.eq_gain_db} dB`, 'summed with the', 'dry signal']],
-    ['Export', 'MP3', ['mono 16-bit', 'if the gate ran']],
+    ['Export', 'MP3', ['16-bit, channels kept', 'if the gate ran']],
   ];
   const W = 960, bw = 168, gap = (W - steps.length * bw) / (steps.length - 1), H = 220;
   return (
@@ -501,7 +501,7 @@ function Recorded() {
           </div>
           <p className="hint" style={{ marginTop: 10 }}>
             {s.hdr ? <>Frame header: MPEG Layer III, {s.hdr.kbps} kbps, {s.hdr.sampleRate / 1000} kHz, {s.hdr.channels === 1 ? 'mono' : 'stereo'}. </> : null}
-            {(s.bytes / 1024).toFixed(0)} KB. Mono output fits the code path where the gate forces mono 16-bit, but that is a consistent reading, not proof of which steps ran.
+            {(s.bytes / 1024).toFixed(0)} KB. Mono output fits a mono upload, or the earlier code path where the gate forced mono, but that is a consistent reading, not proof of which steps ran.
           </p>
           <div><audio controls preload="none" src={mp3Url} aria-label="Play the recorded output file" style={{ width: '100%', marginTop: 8, display: 'block' }} /></div>
         </>
@@ -523,7 +523,7 @@ function Receipts() {
     ['README vs code', `The EQ has no treble boost and its bass gain is about ${sgn(EQ_DC_DB, 0)} dB, not ${sgn(README_EQ.gainDb, 0)}. The gate threshold (${P.gate_threshold.toFixed(1)}× mean noise) was undocumented. README is now corrected.`],
     ['Silent-start assumption', `The noise profile is the first ${P.noise_profile_seconds} s, assumed speech-free. Nothing checks that; the playground shows what happens when it isn’t.`],
     ['Musical noise', 'A hard binary mask with a fixed floor and no smoothing over time or frequency. A soft (Wiener-style) gain would be the usual fix.'],
-    ['Channels and clipping', 'Stereo input keeps the left channel only when the gate or EQ is on. The gate output is now clipped to ±1 before the int16 cast, so peaks over full scale saturate instead of wrapping.'],
+    ['Channels and clipping', 'Stereo input is now gated per channel and stays stereo (it used to keep the left channel only). The gate output is now clipped to ±1 before the int16 cast, so peaks over full scale saturate instead of wrapping.'],
     ['Upload handling', 'The client filename now goes through secure_filename, so uploads stay in uploads/. Still runs with debug=True and has no size limit: fine on localhost, unsafe on a server.'],
     ['Packaging', 'No pinned versions, and the README cites an MIT LICENSE file that does not exist.'],
   ];

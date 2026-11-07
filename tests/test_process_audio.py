@@ -47,6 +47,18 @@ class ProcessAudioTest(unittest.TestCase):
         self.assertFalse(np.any((gated > 0.5) & (out < 0)))
         self.assertFalse(np.any((gated < -0.5) & (out > 0)))
 
+    def test_stereo_denoise_keeps_both_channels(self):
+        r = np.random.default_rng(1)
+        t = np.arange(3 * SR) / SR
+        noise = 0.01 * r.standard_normal(len(t))
+        tone = np.where(t > 1, 0.5 * np.sin(2 * np.pi * 440 * t), 0) + noise  # speech-free first second
+        stereo = np.stack([noise, tone], axis=1)  # the signal is on the right channel only
+        seg = run(to_int16(stereo), {'denoise': 'true'})
+        self.assertEqual(seg.channels, 2)
+        out = np.array(seg.get_array_of_samples()).reshape(-1, 2) / 32767
+        right = out[SR + SR // 2: 2 * SR, 1]
+        self.assertGreater(np.sqrt(np.mean(right ** 2)), 0.3)  # the 0.5-peak tone survives (RMS ~0.35)
+
 
 if __name__ == '__main__':
     unittest.main()

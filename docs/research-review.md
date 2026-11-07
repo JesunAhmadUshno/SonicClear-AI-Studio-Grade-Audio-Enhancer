@@ -48,8 +48,8 @@ synthetic signal.
   beyond full scale saturate instead of wrapping to the opposite sign (tests/test_process_audio.py).
 - **Path traversal on upload:** fixed, the client filename now goes through `werkzeug.utils.secure_filename`
   (tests/test_app.py). Still open: `MAX_CONTENT_LENGTH`, and `debug=False` outside localhost.
-- **Stereo collapse:** when the gate or EQ is on, only the left channel is kept; the gate also forces
-  mono 16-bit output. Non-16-bit input is rescaled by its own dtype but written as int16.
+- **Stereo collapse:** fixed, the gate now runs on each channel and keeps the channel count
+  (tests/test_process_audio.py). Output is still 16-bit. Non-16-bit input is rescaled by its own dtype but written as int16.
 - **Musical noise:** hard binary mask, fixed floor, no smoothing across time or frequency.
 - **Naming:** the repo name says "AI", but nothing is learned. The dashboard says so.
 - **Recorded sample provenance:** `uploads/EP1.mp4` and `uploads/processed_EP1.mp3` have no recorded

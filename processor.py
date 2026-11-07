@@ -44,28 +44,26 @@ def process_audio(input_path, output_path, options):
 
     # Convert to numpy for processing if needed
     if do_denoise or do_eq:
-        samples = np.array(audio.get_array_of_samples())
-        if audio.channels == 2:
-            samples = samples.reshape((-1, 2))
-            data = samples[:, 0] # Left channel for analysis
-        else:
-            data = samples
+        # One column per channel (pydub interleaves them), so stereo stays stereo
+        samples = np.array(audio.get_array_of_samples()).reshape((-1, audio.channels))
         
         # Normalize
-        data_float = data.astype(np.float32) / np.iinfo(samples.dtype).max
+        data_float = samples.astype(np.float32) / np.iinfo(samples.dtype).max
 
     # --- PROCESS: NOISE REDUCTION ---
     if do_denoise:
-        denoised_data = spectral_gate(data_float, sample_rate)
+        # Each channel is gated with its own noise profile
+        denoised_data = np.stack([spectral_gate(data_float[:, c], sample_rate)
+                                  for c in range(audio.channels)], axis=1)
         
-        # Reconstruct AudioSegment
+        # Reconstruct AudioSegment (row-major tobytes() re-interleaves the channels)
         # The ISTFT can overshoot full scale on loud material: clip so it saturates instead of wrapping
         denoised_data_int = (np.clip(denoised_data, -1.0, 1.0) * np.iinfo(np.int16).max).astype(np.int16)
         audio = AudioSegment(
             denoised_data_int.tobytes(), 
             frame_rate=sample_rate,
             sample_width=2, 
-            channels=1
+            channels=audio.channels
         )
 
     # --- PROCESS: COMPRESSION ---
