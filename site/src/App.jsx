@@ -148,7 +148,7 @@ function envelope(x, buckets, W, mid, half) {
 export default function App() {
   useReveal();
   return (
-    <div className="wrap">
+    <div className="wrap"><a className="skip" href="#top">Skip to content</a>
       <MenuBar />
       <div className="glow" aria-hidden="true" />
       <Hero />
@@ -162,7 +162,7 @@ export default function App() {
       <footer>
         Code: <a href={REPO} style={{ color: 'inherit' }}>SonicClear</a> by Jesun Ahmad Ushno. Constants are read from <code>results/params.json</code>, which <code>scripts/make_reference.py</code> copies from <code>processor.py</code>.
         The playgrounds run a JavaScript port of the chain in your browser; the build fails unless that port reproduces scipy and pydub to within rounding.
-      </footer>
+      <nav className="support" aria-label="Support this work"><a href="https://github.com/sponsors/JesunAhmadUshno">Sponsor this work</a><a href="https://github.com/sponsors/JesunAhmadUshno">Donate</a><a href="https://buymeacoffee.com/jesun">Buy Me a Coffee</a><a href="https://calendly.com/jesunahmadushno/30min">Work with me</a></nav></footer>
     </div>
   );
 }
@@ -170,7 +170,7 @@ export default function App() {
 function Hero() {
   const w0 = row('white', 0), p0 = row('pink', 0);
   return (
-    <header className="card hero window" id="top" data-title="SonicClear — README">
+    <header className="card hero window" id="top" data-title="SonicClear - README">
       <div className="head">
         <p className="eyebrow">Classical DSP · Flask app · browser port</p>
         <span className="pill warn">● No listening test recorded</span>
@@ -206,7 +206,7 @@ function Chain() {
   ];
   const W = 960, bw = 168, gap = (W - steps.length * bw) / (steps.length - 1), H = 220;
   return (
-    <section id="chain" className="card window reveal" data-title="processor.py — signal chain">
+    <section id="chain" className="card window reveal" data-title="processor.py - signal chain">
       <p className="eyebrow">The chain</p>
       <h2>Every constant below is read from the code, not retyped.</h2>
       <p className="sub">
@@ -265,7 +265,7 @@ function Gate() {
   const speechInProfile = win > P.synthetic_signal.bursts[0][0];
   const W = 960, H = 120;
   return (
-    <section id="gate" className="card window reveal" data-title="gate.lab — spectral gating playground · live">
+    <section id="gate" className="card window reveal" data-title="gate.lab - spectral gating playground · live">
       <div className="head">
         <div>
           <p className="eyebrow">Live · computed in your browser</p>
@@ -344,7 +344,7 @@ function Compressor() {
     return { d: `M0,190L${pts.join('L')}L${TW},190Z`, top };
   }, [res]);
   return (
-    <section id="compressor" className="card window reveal" data-title="compressor.app — transfer curve · live">
+    <section id="compressor" className="card window reveal" data-title="compressor.app - transfer curve · live">
       <p className="eyebrow">Live · pydub's algorithm, ported</p>
       <h2>Above {thr} dB, every {ratio} dB in becomes 1 dB out.</h2>
       <p className="sub">
@@ -410,7 +410,7 @@ function Eq() {
   let a = 1, b = fs / 2; // frequency where the boost has fallen to half its DC value, in dB
   for (let i = 0; i < 60; i++) { const m = Math.sqrt(a * b); if (eqResponseDb(m, fs, cut, gain) > dc / 2) a = m; else b = m; }
   return (
-    <section id="eq" className="card window reveal" data-title="eq.app — what the EQ really does · live">
+    <section id="eq" className="card window reveal" data-title="eq.app - what the EQ really does · live">
       <div className="head">
         <div>
           <p className="eyebrow">Live · analytic response, checked against pydub</p>
@@ -472,7 +472,7 @@ function Recorded() {
   }, []);
   const W = 960, H = 110;
   return (
-    <section id="recorded" className="card window reveal" data-title="uploads/ — recorded output">
+    <section id="recorded" className="card window reveal" data-title="uploads/ - recorded output">
       <div className="head">
         <div>
           <p className="eyebrow">Recorded · output of a past run</p>
@@ -536,7 +536,7 @@ function Receipts() {
     ['site/src/dsp.check.mjs', 'dsp.check.mjs', 'Build-time known-answer check'],
   ];
   return (
-    <section id="receipts" className="card window reveal" data-title="README.md — receipts and gaps">
+    <section id="receipts" className="card window reveal" data-title="README.md - receipts and gaps">
       <p className="eyebrow">Receipts, limitations, threats</p>
       <h2>What is measured, what is not, and what would break in production.</h2>
       <div className="grid2" style={{ marginTop: 16 }}>
