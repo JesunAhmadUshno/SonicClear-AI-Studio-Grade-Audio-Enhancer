@@ -1,0 +1,18 @@
+core:
+  - changed-files:
+      - any-glob-to-any-file: ["app.py", "processor.py", "scripts/**"]
+tests:
+  - changed-files:
+      - any-glob-to-any-file: ["tests/**"]
+site:
+  - changed-files:
+      - any-glob-to-any-file: ["site/**"]
+web:
+  - changed-files:
+      - any-glob-to-any-file: ["static/**", "templates/**"]
+docs:
+  - changed-files:
+      - any-glob-to-any-file: ["docs/**", "README.md"]
+automation:
+  - changed-files:
+      - any-glob-to-any-file: [".github/**"]
